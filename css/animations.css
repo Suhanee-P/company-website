@@ -76,3 +76,27 @@
 .img-reveal:hover img {
   transform: scale(1.05);
 }
+
+/* Animated Hero Background Pattern */
+.hero-bg-animated {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(9, 49, 154, 0.25), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(74, 43, 226, 0.15), transparent 25%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+  z-index: -1;
+  animation: techGridPan 20s linear infinite alternate;
+}
+
+@keyframes techGridPan {
+  0% { transform: scale(1); background-position: 0 0, 0 0, 0 0, 0 0; }
+  100% { transform: scale(1.02); background-position: 0 0, 0 0, 25px 25px, 25px 25px; }
+}
