@@ -326,3 +326,163 @@ footer {
 
 .footer-socials a { color: var(--text-secondary); }
 .footer-socials a:hover { color: var(--text-primary); }
+
+/* ================================================
+   HAMBURGER MENU
+   ================================================ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  z-index: 1001;
+  flex-shrink: 0;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ================================================
+   TABLET  (≤ 1024px)
+   ================================================ */
+@media (max-width: 1024px) {
+  :root {
+    --section-padding: 80px 0;
+  }
+
+  .glass-card { padding: 30px; }
+
+  /* Slightly tighter nav */
+  .nav-links { gap: 20px; }
+}
+
+/* ================================================
+   MOBILE  (≤ 768px)
+   ================================================ */
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 60px 0;
+  }
+
+  /* Restore system cursor on touch devices */
+  body { cursor: auto; }
+  .cursor { display: none !important; }
+  .btn { cursor: pointer; }
+
+  p { font-size: 1rem; }
+  .container { padding: 0 20px; }
+  .glass-card { padding: 24px; }
+
+  /* ---- Header ---- */
+  .hamburger { display: flex; }
+  .header-cta { display: none; }
+
+  .nav-links {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 8, 22, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    z-index: 1000;
+    padding: 40px;
+  }
+
+  .nav-links.open { display: flex; }
+
+  .nav-links li a {
+    font-size: 1.6rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+
+  /* ---- Benefits Grid ---- */
+  .benefits-grid {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  /* ---- Works header ---- */
+  .works-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+  }
+
+  /* ---- Portfolio ---- */
+  .portfolio-grid { gap: 48px !important; }
+
+  .portfolio-item .img-reveal {
+    height: 240px !important;
+  }
+
+  .flex-between {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    margin-top: 16px !important;
+  }
+
+  /* ---- Services Tabs ---- */
+  .tabs-layout {
+    flex-direction: column !important;
+    gap: 32px !important;
+  }
+
+  .tabs-content-wrap {
+    height: 280px !important;
+  }
+
+  /* ---- About Vision / Mission ---- */
+  .vision-mission-grid {
+    flex-direction: column !important;
+    gap: 40px !important;
+  }
+
+  /* ---- Contact ---- */
+  .contact-layout {
+    flex-direction: column !important;
+    gap: 40px !important;
+  }
+
+  /* ---- Footer ---- */
+  .footer-bottom {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .footer-socials {
+    justify-content: center;
+  }
+
+  /* ---- Tab cursor fix ---- */
+  .tab-link { cursor: pointer !important; }
+}
