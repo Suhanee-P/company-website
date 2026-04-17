@@ -1,102 +1,31 @@
-/* Marquee Animation */
-.marquee-wrapper {
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 40px 0;
-  border-top: 1px solid var(--surface-border);
-  border-bottom: 1px solid var(--surface-border);
-  background: rgba(11,11,15,0.5);
-  display: flex;
-}
-
-.marquee-content {
-  display: inline-flex;
-  animation: marquee 30s linear infinite;
-}
-
-.marquee-content h4 {
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  font-size: clamp(2.5rem, 5vw, 4rem);
-}
-
-.marquee-content .icon {
-  margin-left: 40px;
-  color: var(--accent-color);
-}
-
+/* Marquee keyframe — wrapper/content styles live in index.css */
 @keyframes marquee {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-/* Scroll Fade Animation */
+/* Scroll Fade */
 .fade-up {
   opacity: 0;
-  transform: translateY(50px);
+  transform: translateY(40px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
-
-.fade-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
 
 .stagger-1 { transition-delay: 0.1s; }
 .stagger-2 { transition-delay: 0.2s; }
 .stagger-3 { transition-delay: 0.3s; }
 
-/* Image reveals */
-.img-reveal {
-  position: relative;
-  overflow: hidden;
-}
-
+/* Image Reveal */
+.img-reveal { position: relative; overflow: hidden; }
 .img-reveal::after {
   content: '';
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background-color: var(--bg-color);
+  background-color: var(--canvas);
   transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
   transform-origin: top;
 }
-
-.img-reveal.visible::after {
-  transform: scaleY(0);
-}
-
-.img-reveal img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 1.5s ease;
-}
-
-.img-reveal:hover img {
-  transform: scale(1.05);
-}
-
-/* Animated Hero Background Pattern */
-.hero-bg-animated {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--bg-color);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(9, 49, 154, 0.25), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(74, 43, 226, 0.15), transparent 25%),
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
-  background-position: 0 0, 0 0, 0 0, 0 0;
-  z-index: -1;
-  animation: techGridPan 20s linear infinite alternate;
-}
-
-@keyframes techGridPan {
-  0% { transform: scale(1); background-position: 0 0, 0 0, 0 0, 0 0; }
-  100% { transform: scale(1.02); background-position: 0 0, 0 0, 25px 25px, 25px 25px; }
-}
+.img-reveal.visible::after { transform: scaleY(0); }
+.img-reveal img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.5s ease; }
+.img-reveal:hover img { transform: scale(1.05); }
