@@ -4,6 +4,7 @@
   // otherwise `wrangler deploy` creates a second Worker and the live domain does not update.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "company-website",
+  "account_id": "5cc3defdf22c701e4b8d1c9570d5dd59",
   "main": "worker/index.js",
   "compatibility_date": "2026-08-01",
   "assets": {
