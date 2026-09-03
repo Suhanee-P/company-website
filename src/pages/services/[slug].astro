@@ -1,0 +1,81 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { services } from '../../data/services';
+import { industryBySlug } from '../../data/industries';
+import { breadcrumb, faqPage, service as serviceSchema } from '../../lib/seo';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+const { s } = Astro.props;
+const path = `/services/${s.slug}`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Services', href: '/services' }, { name: s.name, href: path }];
+const work = (await getCollection('work')).filter((w) => (s.relatedWork ?? []).includes(w.id));
+const inds = s.relatedIndustries.map(industryBySlug).filter(Boolean);
+const schema = [serviceSchema({ name: s.name, description: s.metaDescription, path }), faqPage(s.faqs), breadcrumb(crumbs)];
+---
+<Base title={s.metaTitle} description={s.metaDescription} path={path} schema={schema} ogImage={`/og/services-${s.slug}.png`}>
+  <PageHeader crumbs={crumbs} eyebrow="Service" title={s.h1} lead={s.intro[0]} />
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up"><p class="lead">{s.intro[1]}</p></div>
+        <div class="card card-flat fade-up stagger-1">
+          <h3>What you get</h3>
+          <ul class="list-check">{s.deliverables.map((d) => <li>{d}</li>)}</ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="section-header fade-up"><span class="eyebrow">Scope</span><h2>What we build under {s.navLabel.toLowerCase()}</h2></div>
+      <div class="grid grid-3">
+        {s.whatWeBuild.map((w, i) => (
+          <div class={`card fade-up stagger-${(i % 3) + 1}`}><h3>{w.name}</h3><p>{w.body}</p></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col-wide">
+        <div class="fade-up">
+          <span class="eyebrow">Stack</span>
+          <h2 class="mb-3" style="font-size:1.4rem">Tools we use for this</h2>
+          <div class="chips">{s.stack.map((t) => <span class="chip">{t}</span>)}</div>
+        </div>
+        <div class="card card-flat fade-up stagger-1">
+          <h3>How a project starts</h3>
+          <p>A short message from you, a reply within one business day, a 30 to 45 minute scoping call, then a written proposal with the scope and timeline. Work usually begins within two weeks of approval.</p>
+          <a href="/contact" class="btn btn-sm">Send a message</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {work.length > 0 && (
+    <section class="section section-lifted">
+      <div class="container">
+        <div class="section-header fade-up"><span class="eyebrow">Related work</span><h2>Projects that used this service</h2></div>
+        <div class="grid grid-2">
+          {work.map((w) => (
+            <a href={`/work/${w.id}`} class="card fade-up"><span class="chip chip-strong">{w.data.client}</span><h3>{w.data.title}</h3><p>{w.data.summary}</p><span class="card-link">Read the case study</span></a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <Faq faqs={s.faqs} title={`${s.navLabel} questions`} />
+  <RelatedLinks title="Industries where we deliver this most often" items={inds.map((i) => ({ href: `/industries/${i!.slug}`, label: i!.name, sub: `For ${i!.audience.split(',')[0]}` }))} cols={4} />
+  <Cta />
+</Base>

@@ -1,0 +1,133 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { Image } from 'astro:assets';
+import { industries, industryBySlug } from '../../data/industries';
+import { services } from '../../data/services';
+import { breadcrumb, faqPage, service as serviceSchema } from '../../lib/seo';
+import { getCollection } from 'astro:content';
+import fleetImg from '../../assets/images/fleet-rental-dashboard-concept.webp';
+import realEstateImg from '../../assets/images/real-estate-analytics-dashboard-concept.webp';
+import logisticsImg from '../../assets/images/logistics-shipping-website-concept.webp';
+
+export async function getStaticPaths() {
+  return industries.map((ind) => ({ params: { slug: ind.slug }, props: { ind } }));
+}
+const { ind } = Astro.props;
+const path = `/industries/${ind.slug}`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Industries', href: '/industries' }, { name: ind.name, href: path }];
+const images = { fleet: fleetImg, realEstate: realEstateImg, logistics: logisticsImg } as const;
+const img = ind.image ? images[ind.image] : undefined;
+const imgAlt = { fleet: 'Illustration of a fleet management dashboard concept', realEstate: 'Illustration of a real estate performance dashboard concept', logistics: 'Illustration of a logistics company website concept' } as const;
+const work = (await getCollection('work')).filter((w) => (ind.relatedWork ?? []).includes(w.id) || w.data.industry === ind.slug);
+const related = ind.relatedIndustries.map(industryBySlug).filter(Boolean);
+const serviceName = `Custom software development for ${ind.shortName}`;
+const noun = ind.shortName.replace(/ (companies|businesses|brands|firms|manufacturers)$/, '');
+const schema = [
+  serviceSchema({ name: serviceName, description: ind.metaDescription, path, serviceType: 'Custom software development', audience: ind.audience }),
+  faqPage(ind.faqs),
+  breadcrumb(crumbs),
+];
+---
+<Base title={ind.metaTitle} description={ind.metaDescription} path={path} schema={schema} ogImage={`/og/industries-${ind.slug}.png`}>
+  <section class="page-header">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <div class={img ? 'page-header-split' : ''}>
+        <div>
+          <span class="eyebrow">Industry · {ind.name}</span>
+          <h1>{ind.h1}</h1>
+          <p class="lead">{ind.intro[0]}</p>
+          <div class="btn-group mt-3">
+            <a href={`/contact?topic=${encodeURIComponent(ind.name)}`} class="btn">Discuss a {noun} project</a>
+            <a href="#systems" class="btn btn-outline">What we build</a>
+          </div>
+        </div>
+        {img && <div class="figure"><Image src={img} alt={imgAlt[ind.image!]} width={720} loading="eager" /></div>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up"><p class="lead">{ind.intro[1]}</p></div>
+        <div class="card card-flat fade-up stagger-1"><h3>Who we work with</h3><p>{ind.audience[0].toUpperCase() + ind.audience.slice(1)}.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="section-header fade-up"><span class="eyebrow">The problems</span><h2>What {ind.shortName} usually call us about</h2></div>
+      <div class={`grid grid-${ind.challenges.length === 4 ? 4 : 3}`}>
+        {ind.challenges.map((c, i) => <div class={`card fade-up stagger-${(i % 3) + 1}`}><h3 style="font-size:1.1rem">{c.title}</h3><p class="small">{c.body}</p></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="systems">
+    <div class="container">
+      <div class="section-header fade-up"><span class="eyebrow">What we build</span><h2>Systems we build for {ind.shortName}</h2></div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        {ind.solutions.map((s, i) => (
+          <article class="card solution fade-up">
+            <div class="solution-text"><span class="card-num">0{i + 1}</span><h3 class="mt-2">{s.name}</h3><p class="mt-2">{s.body}</p></div>
+            <ul class="list-check small solution-list">{s.features.map((f) => <li>{f}</li>)}</ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="section-header fade-up"><span class="eyebrow">AI, honestly</span><h2>Where AI actually helps in {ind.name.toLowerCase()}</h2><p>Every AI feature we build has a review step, a confidence threshold or a human handoff. These are the uses that pay for themselves.</p></div>
+      <div class={`grid grid-${ind.aiUseCases.length === 4 ? 2 : 3}`}>
+        {ind.aiUseCases.map((a, i) => <div class={`card fade-up stagger-${(i % 3) + 1}`}><span class="tag">AI</span><h3 style="font-size:1.15rem">{a.name}</h3><p>{a.body}</p></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up">
+          <span class="eyebrow">Integrations</span>
+          <h2 class="mb-3" style="font-size:1.5rem">Systems we connect to</h2>
+          <ul class="list-plain">{ind.integrations.map((t) => <li>{t}</li>)}</ul>
+        </div>
+        <div class="fade-up stagger-1">
+          <div><span class="eyebrow">How we build it</span><p>{ind.stackNote}</p></div>
+          <div class="mt-4"><span class="eyebrow">Timelines and engagement</span><p>{ind.engagementNote}</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {work.length > 0 && (
+    <section class="section section-lifted">
+      <div class="container">
+        <div class="section-header fade-up"><span class="eyebrow">Related work</span><h2>Work in {ind.name.toLowerCase()}</h2></div>
+        <div class="grid grid-2">
+          {work.map((w) => <a href={`/work/${w.id}`} class="card fade-up"><span class="chip chip-strong">{w.data.client}</span><h3>{w.data.title}</h3><p>{w.data.summary}</p><span class="card-link">Read the case study</span></a>)}
+        </div>
+      </div>
+    </section>
+  )}
+
+
+  <Faq faqs={ind.faqs} title={`${ind.name} questions`} />
+  <RelatedLinks title="Related industries" items={related.map((r) => ({ href: `/industries/${r!.slug}`, label: r!.name, sub: `For ${r!.audience.split(',')[0]}` }))} />
+  <RelatedLinks title="Services behind this work" items={services.map((s) => ({ href: `/services/${s.slug}`, label: s.name }))} cols={4} />
+  <Cta title={`Building something for a ${noun} business?`} body="Send two paragraphs about the problem. We reply within one business day with questions and a rough range." primary={{ href: `/contact?topic=${encodeURIComponent(ind.name)}`, label: 'Start the conversation' }} />
+</Base>
+<style>
+  .solution { flex-direction: row; gap: 40px; align-items: flex-start; }
+  .solution-text { flex: 1; }
+  .solution-list { flex: 1.1; }
+  @media (max-width: 768px) { .solution { flex-direction: column; gap: 16px; } }
+</style>

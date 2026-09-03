@@ -1,0 +1,20 @@
+---
+import { nav } from '../data/site';
+const { currentPath = '/' } = Astro.props as { currentPath?: string };
+const isCurrent = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href + '/')) || (href !== '/' && currentPath === href);
+---
+<header class="site-header">
+  <nav class="bar" aria-label="Main">
+    <a href="/" class="logo" aria-label="Aresyn home">ARESYN<span class="dot">.</span></a>
+    <ul class="nav-links" id="navLinks">
+      {nav.map((n) => (
+        <li><a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a></li>
+      ))}
+      <li class="nav-mobile-only"><a href="/contact">Contact us</a></li>
+    </ul>
+    <a href="/contact" class="btn header-cta">Contact us</a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>

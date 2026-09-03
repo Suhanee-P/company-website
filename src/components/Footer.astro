@@ -1,0 +1,60 @@
+---
+import { site, socialLinks } from '../data/site';
+import { services } from '../data/services';
+import { industries } from '../data/industries';
+const socials = socialLinks();
+const year = new Date().getFullYear();
+const locationLine = [site.location.city, site.location.region, site.location.country].filter(Boolean).join(', ');
+---
+<footer class="site-footer">
+  <div class="container">
+    <h2 class="footer-headline">Have a project in mind? <span class="stroke-white">Let's talk.</span></h2>
+    <p class="footer-intro">Send a short description of what you need. We reply {site.responseTime}, and a written proposal follows a short call.</p>
+    <div class="btn-group">
+      <a href="/contact" class="btn" style="background:#fff;color:#141413;border-color:#fff">Start a project</a>
+      <a href={site.whatsapp} class="btn btn-whatsapp" rel="noopener" target="_blank">WhatsApp us</a>
+    </div>
+
+    <div class="footer-grid">
+      <div class="footer-col">
+        <p class="footer-col-header">{site.name}</p>
+        <p>{site.tagline}. Based in {locationLine}, working with clients in India, the US, the UK, the Middle East and Australia.</p>
+        <ul class="mt-3">
+          <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><a href={`tel:${site.phoneE164}`}>{site.phoneDisplay}</a></li>
+          <li><span style="color:rgba(255,255,255,0.5);font-size:0.85rem">{site.workingHours}</span></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-header">Services</p>
+        <ul>
+          {services.map((s) => <li><a href={`/services/${s.slug}`}>{s.name}</a></li>)}
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-header">Industries</p>
+        <ul>
+          {industries.slice(0, 8).map((i) => <li><a href={`/industries/${i.slug}`}>{i.name}</a></li>)}
+          <li><a href="/industries">All industries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-header">Company</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/work">Work and case studies</a></li>
+          <li><a href="/guides">Guides</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          {socials.map((s) => <li><a href={s.url} rel="me noopener" target="_blank">{s.label}</a></li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <a href="/" class="logo">ARESYN<span class="dot">.</span></a>
+      <span>© {year} {site.name}. All rights reserved.</span>
+      <span><a href={`mailto:${site.email}`}>{site.email}</a></span>
+    </div>
+  </div>
+</footer>

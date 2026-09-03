@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import { features, featureBySlug, categoryLabels } from '../../data/features';
+import { industries } from '../../data/industries';
+import { rates } from '../../data/rates';
+import { breadcrumb, faqPage } from '../../lib/seo';
+import { usdRange, inrRange, hoursRange, weeksRange, featureSpan } from '../../lib/cost';
+
+export async function getStaticPaths() {
+  return features.map((f) => ({ params: { slug: f.slug }, props: { f } }));
+}
+const { f } = Astro.props;
+const path = `/cost/${f.slug}`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Feature cost guides', href: '/cost' }, { name: f.name, href: path }];
+const span = featureSpan(f.tiers);
+const related = f.related.map(featureBySlug).filter(Boolean);
+const inds = industries.filter((i) => (i.relatedCostFeatures ?? []).includes(f.slug)).slice(0, 4);
+const title = `Cost to ${f.question.replace(/^How much does it cost to /i, '').replace(/\?$/, '')} (2026)`;
+const directAnswer = `${f.name} typically takes ${hoursRange(span)} of design, development and testing, which is ${usdRange(span)} (${inrRange(span)}) at a blended rate of $${rates.usdPerHour} per hour for a senior India-based team. ${f.summary}`;
+const schema = [faqPage([{ q: f.question, a: directAnswer }, ...f.faqs]), breadcrumb(crumbs)];
+---
+<Base title={title} description={f.metaDescription} path={path} schema={schema} ogImage={`/og/cost-${f.slug}.png`}>
+  <section class="page-header">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <span class="eyebrow">{categoryLabels[f.category]}</span>
+      <h1>{f.question}</h1>
+      <div class="answer mt-3">
+        <p class="figure-line">{usdRange(span)} <small>{inrRange(span)} · {hoursRange(span)} of design, development and testing · Basic to Advanced</small></p>
+        <p>{f.summary}</p>
+      </div>
+      <p class="small muted">Estimates at a blended rate of ${rates.usdPerHour} per hour (₹{rates.inrPerHour.toLocaleString('en-IN')}) for a senior India-based team. Reviewed {rates.lastReviewed}. A written quote depends on your scope.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-up"><span class="eyebrow">Tiers</span><h2>What each level includes</h2></div>
+      <div class="tiers">
+        {f.tiers.map((t, i) => (
+          <div class={`tier fade-up stagger-${i + 1}${i === 1 ? ' featured' : ''}`}>
+            <span class="tier-name">{t.name}{i === 1 ? ' · most common' : ''}</span>
+            <span class="tier-price">{usdRange(t.hours)}</span>
+            <span class="tier-sub">{inrRange(t.hours)} · {hoursRange(t.hours)} · {weeksRange(t.hours)} for one developer</span>
+            <ul class="list-check">{t.includes.map((x) => <li>{x}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+      <div class="stat-row mt-4 fade-up">
+        <div class="stat"><div class="stat-label">Design</div><div class="stat-value">{f.breakdown.design}%</div></div>
+        <div class="stat"><div class="stat-label">Development</div><div class="stat-value">{f.breakdown.development}%</div></div>
+        <div class="stat"><div class="stat-label">Testing and QA</div><div class="stat-value">{f.breakdown.qa}%</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up">
+          <span class="eyebrow">Cost drivers</span>
+          <h2 class="mb-3" style="font-size:1.5rem">What pushes the cost up</h2>
+          <ul class="list-plain">{f.costDrivers.map((d) => <li>{d}</li>)}</ul>
+        </div>
+        <div class="fade-up stagger-1">
+          {f.cheaperAlternative && <div><span class="eyebrow">Cheaper alternative</span><div class="notice">{f.cheaperAlternative}</div></div>}
+          <div class="mt-4"><span class="eyebrow">Recurring and hidden costs</span><ul class="list-plain">{f.hiddenCosts.map((h) => <li>{h}</li>)}</ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col-wide">
+        <div class="fade-up">
+          <span class="eyebrow">Method</span>
+          <h2 style="font-size:1.5rem" class="mb-2">How we estimate</h2>
+          <p>Hour ranges cover design, development and testing for a senior team building this feature into a typical product. Multiply by our blended rate of ${rates.usdPerHour} per hour to get the USD figures above; INR uses ₹{rates.inrPerHour.toLocaleString('en-IN')} per hour. A brand new product also needs a project foundation of {rates.projectFoundationHours[0]} to {rates.projectFoundationHours[1]} hours (setup, design system, environments, deployment, QA harness), which the <a href="/tools/app-development-cost-calculator">calculator</a> adds automatically. Estimates are for planning; a written quote follows a scoping call.</p>
+        </div>
+        <div class="fade-up stagger-1">
+          <span class="eyebrow">Related features</span>
+          <div class="table-wrap mt-2">
+            <table><tbody>{related.map((r) => { const s = featureSpan(r!.tiers); return <tr><td><a href={`/cost/${r!.slug}`}>{r!.name}</a></td><td class="num">{usdRange(s)}</td></tr>; })}</tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq faqs={f.faqs} title={`${f.name}: common questions`} />
+  {inds.length > 0 && (
+    <section class="section-sm"><div class="container"><h2 class="mb-3" style="font-size:1.35rem">Industries where this comes up</h2><div class="chips">{inds.map((i) => <a href={`/industries/${i.slug}`} class="chip">{i.name}</a>)}</div></div></section>
+  )}
+  <Cta title={`Need ${f.name.toLowerCase()} built?`} body="Tell us what it needs to do and which systems it must talk to. We reply within one business day with a firmer range." />
+</Base>

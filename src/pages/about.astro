@@ -1,0 +1,86 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Cta from '../components/Cta.astro';
+import { site } from '../data/site';
+import { services } from '../data/services';
+import { breadcrumb } from '../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'About', href: '/about' }];
+const locationLine = [site.location.city, site.location.region, site.location.country].filter(Boolean).join(', ');
+const stack = Array.from(new Set(services.flatMap((s) => s.stack)));
+---
+<Base title="About Aresyn Technologies | Senior Software Team in India" description={`Founder-led software studio in ${locationLine} building custom web apps, mobile apps and AI automation for clients worldwide. Meet the team and how we work.`} path="/about" pageType="AboutPage" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="About" title="A small, senior, founder-led software team." lead={`${site.name} is a software studio based in ${locationLine}. We design and build custom web applications, mobile apps and AI automation for businesses in India and abroad, and we stay small on purpose: every project is led by an engineer who writes code on it.`} />
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up">
+          <span class="eyebrow">Why we exist</span>
+          <h2>Most software projects fail on communication, not on code.</h2>
+        </div>
+        <div class="stack fade-up stagger-1">
+          <p class="lead">Founders and operations leaders tell us the same story: the last vendor said yes to everything, went quiet for weeks, and delivered something that did not match how the business works.</p>
+          <p>We run projects differently. Scope is written down before work starts. You see a demo every week. The people you talk to are the people building. And we say no to features that will not earn their cost, because a smaller system that gets used beats a larger one that does not.</p>
+          <p>We build with modern, well-supported tools, we keep AI honest with human review where it matters, and we leave every client with code, documentation and accounts they fully own.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">Team</span>
+        <h2>Who you will work with</h2>
+      </div>
+      <div class="grid grid-2">
+        <div class="card fade-up">
+          <h3>A lead engineer on every project</h3>
+          <p>Each project is led by a senior engineer who runs the scoping call, writes the proposal, designs the architecture and still writes code on the work every week. That person is your single point of contact from the first message to handover, so nothing is lost between a salesperson and a delivery team.</p>
+        </div>
+        <div class="card card-flat fade-up stagger-1">
+          <h3>A senior core team, extended when needed</h3>
+          <p>Aresyn is a small group of senior engineers and designers who have worked together on multiple projects. When a project needs a specialist, for example in 3D, data engineering or a specific mobile platform, we bring in people we have already shipped with rather than strangers learning on your project.</p>
+          <p class="small">Working hours: {site.workingHours}. Time zone: {site.timezone}.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">Principles</span>
+        <h2>How we work</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card card-flat fade-up stagger-1"><h3>Scope in writing</h3><p>Every proposal states what is included, what is not, and the timeline. Changes are agreed in writing too, so there are no surprises on either side.</p></div>
+        <div class="card card-flat fade-up stagger-2"><h3>Demo every week</h3><p>You see working software every week on a staging environment you can use yourself, and you can reprioritise the backlog at any point.</p></div>
+        <div class="card card-flat fade-up stagger-3"><h3>You own everything</h3><p>Repositories, cloud accounts, domains and services are in your name from day one. Documentation is written so another team could take over.</p></div>
+        <div class="card card-flat fade-up stagger-1"><h3>Honest about AI</h3><p>We measure accuracy on your data before launch and build review steps into anything that touches customers or money. We will tell you when AI is not the answer.</p></div>
+        <div class="card card-flat fade-up stagger-2"><h3>Boring technology, deliberately</h3><p>We pick tools with long support horizons and large talent pools, so you can hire for your system later without needing us.</p></div>
+        <div class="card card-flat fade-up stagger-3"><h3>Small by design</h3><p>No account managers or handoffs. The engineer on the scoping call is the engineer in the weekly demo.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="two-col-wide">
+        <div class="fade-up">
+          <span class="eyebrow">Tools we use</span>
+          <h2 class="mb-3">The stack behind our work</h2>
+          <div class="chips">{stack.map((t) => <span class="chip">{t}</span>)}</div>
+        </div>
+        <div class="card fade-up stagger-1">
+          <h3>Where we work</h3>
+          <p>Remote-first from {locationLine}, with clients in India, the US, the UK, the Middle East and Australia. Meetings are scheduled inside your working day; our hours overlap with US and European mornings and the whole Indian and Gulf business day.</p>
+          <p class="small">Prefer WhatsApp? <a href={site.whatsapp} rel="noopener" target="_blank">Message us directly</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Cta title="Want to talk to the people who will build it?" body="Send a short note about your project and an engineer replies personally, usually within one business day." />
+</Base>

@@ -1,0 +1,102 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Faq from '../components/Faq.astro';
+import { site } from '../data/site';
+import { breadcrumb, faqPage } from '../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact' }];
+const faqs = [
+  { q: 'What happens after I send a message?', a: `You get a reply ${site.responseTime} with clarifying questions. If it looks like a fit we book a 30 to 45 minute scoping call, and a written proposal follows within a few days of that call.` },
+  { q: 'What should I include in my first message?', a: 'What the software should do, who will use it, any deadline, and links to anything relevant: your current site or app, a competitor, a sketch. Two paragraphs is plenty. If you are not sure what you need yet, say so; part of the first call is working that out together.' },
+  { q: 'Do you work with clients outside India?', a: 'Yes. Most of our work is remote and our hours overlap with US and European mornings and the full Gulf business day. Contracts and invoices can be in USD, GBP, AED or INR, and we sign a mutual NDA before detailed discussions if you prefer.' },
+  { q: 'Can I hire you for a small task?', a: 'Yes, within reason. Small fixes, technical reviews and short consultations are welcome, and they are often how longer relationships start. For ongoing needs, a part-time engagement with a regular weekly rhythm works better for both sides than one-off requests.' },
+];
+---
+<Base title="Contact Aresyn | Start a Software, App or AI Project" description={`Tell us about your project. We reply ${site.responseTime}. Email, WhatsApp or the form, whichever you prefer.`} path="/contact" pageType="ContactPage" schema={[breadcrumb(crumbs), faqPage(faqs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Contact" title="Tell us what you need built." lead={`Send a short description. We reply ${site.responseTime}. No pressure and no sales sequence.`} />
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col-wide">
+        <div class="card fade-up">
+          <h2 style="font-size:1.4rem">Send a message</h2>
+          <form class="form" id="contactForm" method="post" action="/api/contact" novalidate>
+            <div class="grid grid-2" style="gap:14px">
+              <div class="field"><label for="name">Your name</label><input class="input" id="name" name="name" type="text" required autocomplete="name" /></div>
+              <div class="field"><label for="email">Work email</label><input class="input" id="email" name="email" type="email" required autocomplete="email" /></div>
+            </div>
+            <div class="field"><label for="company">Company (optional)</label><input class="input" id="company" name="company" type="text" autocomplete="organization" /></div>
+            <div class="field"><label for="message">What do you need?</label><textarea class="textarea" id="message" name="message" rows="6" required placeholder="What it should do, who will use it, any deadline, and links to anything relevant."></textarea></div>
+            <input type="hidden" name="topic" id="topic" value="" />
+            <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+            <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+            <div class="btn-group">
+              <button type="submit" class="btn" id="submitBtn">Send message</button>
+              <a href={site.whatsapp} class="btn btn-whatsapp" rel="noopener" target="_blank">WhatsApp instead</a>
+            </div>
+            <p class="form-note">We only use your details to reply to you. See the <a href="/privacy">privacy note</a>.</p>
+          </form>
+        </div>
+        <div class="stack fade-up stagger-1">
+          <div>
+            <p class="eyebrow">Direct</p>
+            <p><a href={`mailto:${site.email}`} style="font-size:1.15rem;font-weight:500;text-decoration:none">{site.email}</a></p>
+            <p class="mt-1"><a href={`tel:${site.phoneE164}`} style="font-size:1.15rem;font-weight:500;text-decoration:none">{site.phoneDisplay}</a></p>
+            <p class="small mt-1">{site.workingHours}</p>
+          </div>
+          <div>
+            <p class="eyebrow">What to include</p>
+            <ul class="list-check">
+              <li>What the software should do, in plain words</li>
+              <li>Who will use it and roughly how many people</li>
+              <li>A deadline or event date, if there is one</li>
+              <li>Links: current site or app, a competitor, a sketch</li>
+            </ul>
+          </div>
+          <div>
+            <p class="eyebrow">What happens next</p>
+            <ol class="list-plain" style="list-style:decimal;padding-left:1.2em">
+              <li style="display:list-item">A reply with questions, within one business day</li>
+              <li style="display:list-item">A 30 to 45 minute scoping call</li>
+              <li style="display:list-item">A written proposal with scope and timeline</li>
+            </ol>
+          </div>
+          <div class="notice">Prefer email? Write to <a href={`mailto:${site.email}`}>{site.email}</a> with the same details and we will pick it up just as quickly.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq faqs={faqs} title="Before you write" />
+
+  <script define:vars={{ email: site.email }}>
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+    const btn = document.getElementById('submitBtn');
+    const params = new URLSearchParams(location.search);
+    const topic = params.get('topic'); const estimate = params.get('estimate');
+    if (topic) document.getElementById('topic').value = topic;
+    if (estimate) document.getElementById('message').value = `Estimate reference:\n${estimate}\n\n`;
+    const show = (cls, html) => { status.className = 'form-status ' + cls; status.innerHTML = html; };
+    const mailtoFallback = (d) => {
+      const body = `Name: ${d.name}\nEmail: ${d.email}\nCompany: ${d.company || ''}\nTopic: ${d.topic || ''}\n\n${d.message}`;
+      return `mailto:${email}?subject=${encodeURIComponent('Website enquiry from ' + d.name)}&body=${encodeURIComponent(body)}`;
+    };
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const d = Object.fromEntries(new FormData(form).entries());
+      if (!d.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) || String(d.message).trim().length < 10) {
+        show('err', 'Please add your name, a valid email and a short description (at least a sentence).'); return;
+      }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(d) });
+        const out = await res.json().catch(() => ({}));
+        if (res.ok && out.ok) { show('ok', 'Thanks. Your message is on its way; expect a reply within one business day.'); form.reset(); }
+        else { const href = mailtoFallback(d); show('err', `The form could not send right now. <a href="${href}">Click here to send the same message by email</a>, or WhatsApp us.`); window.location.href = href; }
+      } catch {
+        const href = mailtoFallback(d); show('err', `The form could not send right now. <a href="${href}">Click here to send the same message by email</a>.`); window.location.href = href;
+      } finally { btn.disabled = false; btn.textContent = 'Send message'; }
+    });
+  </script>
+</Base>

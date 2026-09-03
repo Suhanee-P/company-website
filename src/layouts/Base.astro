@@ -1,0 +1,102 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { abs, graph, organization, website, webPage } from '../lib/seo';
+
+interface Props {
+  title: string;                 // <title>, keep under ~60 chars
+  description: string;           // meta description
+  path: string;                  // canonical path, e.g. '/industries/real-estate'
+  ogImage?: string;              // absolute or site-relative
+  ogType?: 'website' | 'article';
+  schema?: unknown[];            // extra JSON-LD nodes (org + website are always included)
+  pageType?: string;             // schema.org WebPage subtype, e.g. 'AboutPage', 'ContactPage', 'CollectionPage'
+  noindex?: boolean;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+}
+const { title, description, path, ogImage, ogType = 'website', schema = [], pageType, noindex = false, publishedTime, modifiedTime } = Astro.props;
+const canonical = abs(path);
+const og = ogImage ? (ogImage.startsWith('http') ? ogImage : abs(ogImage)) : abs('/og/default.png');
+const jsonLd = graph(organization(), website(), webPage({ type: pageType, name: title, description, path }), ...schema);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+    <meta name="theme-color" content="#F3F0EE" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header currentPath={path} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Hamburger
+      const hamburger = document.getElementById('hamburger');
+      const navLinks = document.getElementById('navLinks');
+      if (hamburger && navLinks) {
+        const toggle = (open?: boolean) => {
+          const isOpen = open ?? !navLinks.classList.contains('open');
+          navLinks.classList.toggle('open', isOpen);
+          hamburger.classList.toggle('open', isOpen);
+          hamburger.setAttribute('aria-expanded', String(isOpen));
+          document.body.style.overflow = isOpen ? 'hidden' : '';
+        };
+        hamburger.addEventListener('click', () => toggle());
+        navLinks.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => toggle(false)));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggle(false); });
+      }
+      // Scroll reveal
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const els = document.querySelectorAll('.fade-up');
+      if (reduce || !('IntersectionObserver' in window)) els.forEach((el) => el.classList.add('visible'));
+      else {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
+        }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+        els.forEach((el) => io.observe(el));
+        // Safety net: never leave content hidden (print, screenshots, odd viewports).
+        window.setTimeout(() => els.forEach((el) => el.classList.add('visible')), 2500);
+        window.addEventListener('beforeprint', () => els.forEach((el) => el.classList.add('visible')));
+      }
+    </script>
+  </body>
+</html>

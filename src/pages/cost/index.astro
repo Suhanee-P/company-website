@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import { features, categoryLabels } from '../../data/features';
+import { rates } from '../../data/rates';
+import { breadcrumb, faqPage } from '../../lib/seo';
+import { usdRange, inrRange, featureSpan } from '../../lib/cost';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Feature cost guides', href: '/cost' }];
+const cats = Object.keys(categoryLabels) as (keyof typeof categoryLabels)[];
+const faqs = [
+  { q: 'How are these cost ranges calculated?', a: `Each feature has three tiers with an hour range covering design, development and testing. We multiply hours by a blended rate of $${rates.usdPerHour} per hour (about ₹${rates.inrPerHour.toLocaleString('en-IN')}) for a senior India-based team. The ranges are the same ones we use internally when we scope a proposal, reviewed on ${rates.lastReviewed}.` },
+  { q: 'Why is there such a wide range for one feature?', a: 'Because "add payments" can mean a hosted checkout link or a full subscription system with proration, invoices and dunning. The tiers on each page describe what is included at each level so you can pick the one that matches your need, and the calculator lets you combine tiers across features.' },
+  { q: 'Do these prices include the whole app?', a: 'No. Feature ranges cover the feature itself. A new product also needs a project foundation of roughly ' + rates.projectFoundationHours[0] + ' to ' + rates.projectFoundationHours[1] + ' hours for setup, design system, environments, deployment and QA, which the calculator adds automatically. Existing products skip most of that.' },
+  { q: 'Will a quote from Aresyn match these numbers?', a: 'Usually it lands inside the range, sometimes below it when an off-the-shelf tool covers part of the work. A written quote is based on your specific scope after a call, and if it differs from the published range we explain why.' },
+];
+---
+<Base title="How Much Does It Cost to Build App Features? 30 Cost Guides" description="Effort and cost ranges for 30 common web and mobile app features, from authentication and payments to AI chatbots, with tiers, cost drivers and cheaper alternatives." path="/cost" pageType="CollectionPage" schema={[breadcrumb(crumbs), faqPage(faqs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Cost guides" title="How much does it cost to build each part of an app?" lead={`Thirty feature-level cost guides using the hour ranges we quote from, at a blended rate of $${rates.usdPerHour} per hour for a senior India-based team. Each page explains the tiers, what drives cost up, the recurring fees, and when an off-the-shelf tool is the better buy.`}>
+    <div class="btn-group mt-3"><a href="/tools/app-development-cost-calculator" class="btn">Combine features in the calculator</a></div>
+  </PageHeader>
+  <section class="section">
+    <div class="container">
+      {cats.map((c) => { const list = features.filter((f) => f.category === c); return list.length ? (
+        <div class="mb-3" style="margin-bottom:44px">
+          <h2 style="font-size:1.3rem" class="mb-2">{categoryLabels[c]}</h2>
+          <div class="table-wrap fade-up">
+            <table>
+              <thead><tr><th>Feature</th><th>Effort (Basic to Advanced)</th><th class="num">USD</th><th class="num">INR</th></tr></thead>
+              <tbody>{list.map((f) => { const span = featureSpan(f.tiers); return (
+                <tr><td><a href={`/cost/${f.slug}`}>{f.question}</a></td><td>{span[0]} to {span[1]} hours</td><td class="num">{usdRange(span)}</td><td class="num">{inrRange(span)}</td></tr>
+              ); })}</tbody>
+            </table>
+          </div>
+        </div>
+      ) : null; })}
+      <p class="small muted">Ranges last reviewed {rates.lastReviewed}. {rates.note}</p>
+    </div>
+  </section>
+  <Faq faqs={faqs} title="About these estimates" />
+  <Cta />
+</Base>

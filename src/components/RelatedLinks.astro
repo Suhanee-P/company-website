@@ -1,0 +1,20 @@
+---
+interface Props { title: string; items: { href: string; label: string; sub?: string }[]; cols?: 2 | 3 | 4 }
+const { title, items, cols = 3 } = Astro.props;
+---
+{items.length > 0 && (
+  <section class="section-sm">
+    <div class="container">
+      <h2 class="mb-3" style="font-size:1.35rem">{title}</h2>
+      <div class={`grid grid-${cols}`}>
+        {items.map((it) => (
+          <a href={it.href} class="card card-flat">
+            <strong>{it.label}</strong>
+            {it.sub && <p class="small">{it.sub}</p>}
+            <span class="card-link">View</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { getCollection, render } from 'astro:content';
+import { industryBySlug } from '../../data/industries';
+import { serviceBySlug } from '../../data/services';
+import { article, breadcrumb } from '../../lib/seo';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+const workImages = import.meta.glob<{ default: ImageMetadata }>('../../assets/work/*.{webp,jpg,png}', { eager: true });
+
+export async function getStaticPaths() {
+  const work = await getCollection('work');
+  return work.map((w) => ({ params: { id: w.id }, props: { w } }));
+}
+const { w } = Astro.props;
+const { Content } = await render(w);
+const path = `/work/${w.id}`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Work', href: '/work' }, { name: w.data.client, href: path }];
+const ind = industryBySlug(w.data.industry);
+const svcs = w.data.services.map(serviceBySlug).filter(Boolean);
+const initials = w.data.testimonial.author.split(/\s+/).map((x) => x[0]).join('').slice(0, 2).toUpperCase();
+const imgs = w.data.images.map((im) => ({ ...im, meta: workImages[`../../assets/work/${im.file}`]?.default })).filter((im) => im.meta);
+const schema = [article({ title: w.data.title, description: w.data.summary, path, datePublished: w.data.datePublished, dateModified: w.data.dateModified }), breadcrumb(crumbs)];
+---
+<Base title={w.data.metaTitle ?? w.data.title} description={w.data.summary} path={path} ogType="article" schema={schema} ogImage={`/og/work-${w.id}.png`} publishedTime={w.data.datePublished}>
+  <section class="page-header">
+    <div class="container">
+      <Breadcrumbs items={crumbs} />
+      <div class="chips mb-2"><span class="chip chip-strong">{w.data.client}</span>{ind && <a href={`/industries/${ind.slug}`} class="chip">{ind.name}</a>}{svcs.map((s) => <a href={`/services/${s!.slug}`} class="chip">{s!.navLabel}</a>)}</div>
+      <h1>{w.data.title}</h1>
+      <p class="lead">{w.data.summary}</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      {imgs.length > 0 && (
+        <div class="work-gallery">
+          {imgs.map((im, i) => (
+            <figure class={`work-figure fade-up visible${i === 0 && imgs.length >= 3 ? ' work-figure-lead' : ''}`}>
+              <Image src={im.meta!} alt={im.alt} width={i === 0 ? 1400 : 900} loading={i === 0 ? 'eager' : 'lazy'} />
+              {im.caption && <figcaption class="small muted">{im.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      )}
+      <div class="two-col-wide">
+        <div class="prose fade-up"><Content /></div>
+        <div class="fade-up stagger-1">
+          <figure class="quote">
+            <blockquote>“{w.data.testimonial.quote}”</blockquote>
+            <figcaption><div class="testimonial-author" style="margin-top:8px"><div class="author-avatar" aria-hidden="true">{initials}</div><div><strong>{w.data.testimonial.author}</strong>{w.data.testimonial.role}</div></div></figcaption>
+          </figure>
+          <div class="card card-flat mt-3"><h3>What we delivered</h3><ul class="list-check small">{w.data.deliverables.map((d) => <li>{d}</li>)}</ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <RelatedLinks title="Related pages" items={[...(ind ? [{ href: `/industries/${ind.slug}`, label: ind.name, sub: 'Industry page' }] : []), ...svcs.map((s) => ({ href: `/services/${s!.slug}`, label: s!.name, sub: 'Service' }))]} />
+  <Cta title="Have a similar project?" />
+</Base>
+<style>
+  .work-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-bottom: 56px; align-items: start; }
+  .work-figure { background: #fff; border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+  .work-figure img { width: 100%; height: auto; display: block; }
+  .work-figure figcaption { padding: 14px 18px; }
+  .work-figure-lead { grid-column: 1 / -1; }
+  @media (max-width: 768px) { .work-gallery { grid-template-columns: 1fr; } }
+</style>
