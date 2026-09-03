@@ -1,0 +1,4 @@
+# Old flat URLs are handled by Cloudflare Pages automatically (/about.html -> /about).
+# Keep legacy entry points pointing at the new structure.
+/index.html / 301
+/services.html /services 301

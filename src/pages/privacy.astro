@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { site } from '../data/site';
+import { breadcrumb } from '../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Privacy', href: '/privacy' }];
+---
+<Base title="Privacy | Aresyn Technologies" description="What Aresyn Technologies collects through this website, why, and how to contact us about your data." path="/privacy" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Privacy" title="Privacy note" lead="Short version: we collect what you send us through the contact form and nothing else we do not need." />
+  <section class="section">
+    <div class="container-narrow prose">
+      <h2>What we collect</h2>
+      <p>When you use the contact form, WhatsApp or email, we receive the details you send: your name, email address, company, message and any attachments. We use them to reply to you and, if we work together, to run the project.</p>
+      <h2>Hosting and logs</h2>
+      <p>This site is served by Cloudflare, which keeps standard server logs (IP address, browser type, pages requested) for security and reliability. We do not run advertising trackers. If we add analytics, it will be a privacy-focused tool that does not use cross-site cookies, and this page will say so.</p>
+      <h2>Sharing</h2>
+      <p>We do not sell or share your details. Contact form messages are delivered to our mailbox through a transactional email provider under contract with us.</p>
+      <h2>Retention and your rights</h2>
+      <p>We keep enquiry emails for as long as they are useful for the conversation or the project. You can ask us to delete your details at any time by writing to <a href={`mailto:${site.email}`}>{site.email}</a>. We handle personal data in line with India's Digital Personal Data Protection Act and, for clients abroad, the rules that apply where you are.</p>
+      <p class="small">Last updated: 3 September 2026.</p>
+    </div>
+  </section>
+</Base>

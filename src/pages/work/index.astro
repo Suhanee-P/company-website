@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Cta from '../../components/Cta.astro';
+import { breadcrumb } from '../../lib/seo';
+import { industryBySlug } from '../../data/industries';
+import { getCollection } from 'astro:content';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Work', href: '/work' }];
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="Work & Case Studies | Aresyn Technologies" description="Selected projects: an AI style assistant, a 3D product configurator for a pharma expo stand, a skincare brand website and strategy, and a wellness mobile app." path="/work" pageType="CollectionPage" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Work" title="Projects, in the client's words." lead="Short case studies with the client's own testimonial. We do not publish numbers a client has not shared, so these describe the brief, the work and the outcome as they told it." />
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2">
+        {work.map((w, i) => { const ind = industryBySlug(w.data.industry); return (
+          <a href={`/work/${w.id}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <div class="chips"><span class="chip chip-strong">{w.data.client}</span>{ind && <span class="chip small">{ind.name}</span>}</div>
+            <h2 style="font-size:1.3rem">{w.data.title}</h2>
+            <p>{w.data.summary}</p>
+            <span class="card-link">Read the case study</span>
+          </a>
+        ); })}
+      </div>
+    </div>
+  </section>
+  <Cta title="Want to be the next one?" />
+</Base>

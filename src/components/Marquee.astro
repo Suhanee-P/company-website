@@ -1,0 +1,9 @@
+---
+const items = ['Web applications', 'Mobile apps', 'AI automation', 'Customer portals', 'Dashboards', 'Product design', 'Brand identity', 'Integrations'];
+const doubled = [...items, ...items];
+---
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-content">
+    {doubled.map((t) => <span>{t}</span>)}
+  </div>
+</div>

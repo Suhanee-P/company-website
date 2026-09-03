@@ -1,0 +1,111 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import { features, categoryLabels } from '../../data/features';
+import { rates } from '../../data/rates';
+import { breadcrumb, faqPage, abs } from '../../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Tools', href: '/tools/app-development-cost-calculator' }, { name: 'App development cost calculator', href: '/tools/app-development-cost-calculator' }];
+const data = features.map((f) => ({ slug: f.slug, name: f.name, category: f.category, tiers: f.tiers.map((t) => ({ name: t.name, hours: t.hours })) }));
+const cats = Object.keys(categoryLabels) as (keyof typeof categoryLabels)[];
+const faqs = [
+  { q: 'How accurate is this calculator?', a: 'It uses the same per-feature hour ranges we quote from, so a real proposal usually lands inside the range it shows. It cannot see your integrations, data quality or design ambitions, which is why the range is wide. Treat it as a budgeting tool, then send us the estimate for a firmer number.' },
+  { q: 'What does the project foundation cover?', a: `Every new product needs setup that is not a feature: repository and CI/CD, design system, environments, hosting, monitoring, QA harness and launch checklist. We budget ${rates.projectFoundationHours[0]} to ${rates.projectFoundationHours[1]} hours for it. If you are adding features to an existing product, switch it off.` },
+  { q: 'Why do mobile and "both" cost more?', a: 'Mobile apps need store submissions, device testing and platform-specific handling for notifications, permissions and offline behaviour. Building web and mobile together shares the backend but not the interfaces, so the multiplier is lower than doubling but well above one.' },
+  { q: 'Can I use a different hourly rate?', a: `Yes. The default is our blended rate of $${rates.usdPerHour} per hour for a senior India-based team. Pick a preset for US or European agencies to compare, or enter your own rate to model a different vendor. Hours stay the same; only the money changes.` },
+];
+const schema = [
+  { '@type': 'WebApplication', name: 'App development cost calculator', url: abs('/tools/app-development-cost-calculator'), applicationCategory: 'BusinessApplication', operatingSystem: 'Web', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, provider: { '@id': `${abs('/')}/#organization` }, description: 'Estimate the cost and timeline of a web or mobile app by selecting features and tiers. Ranges in USD and INR based on published hour estimates.' },
+  faqPage(faqs), breadcrumb(crumbs),
+];
+---
+<Base title="App Development Cost Calculator (2026) | Aresyn" description="Estimate the cost of a web or mobile app in minutes. Pick features and tiers, choose web, mobile or both, and get a cost and timeline range in USD and INR. Free." path="/tools/app-development-cost-calculator" schema={schema} ogImage="/og/tools-app-development-cost-calculator.png">
+  <PageHeader crumbs={crumbs} eyebrow="Free tool" title="App development cost calculator" lead={`Tick the features your product needs, pick a tier for each, and get an effort and cost range at our blended rate of $${rates.usdPerHour} per hour. The hours behind every line are published on the cost guide pages, so nothing here is a black box.`} />
+  <section class="section">
+    <div class="container">
+      <div class="calc">
+        <div class="calc-features" id="calcFeatures">
+          {cats.map((c) => { const list = data.filter((f) => f.category === c); return list.length ? (
+            <div class="calc-group">
+              <h3>{categoryLabels[c]}</h3>
+              {list.map((f) => (
+                <div class="calc-item">
+                  <input type="checkbox" id={`f-${f.slug}`} data-slug={f.slug} />
+                  <label for={`f-${f.slug}`}>{f.name}<small><a href={`/cost/${f.slug}`} target="_blank" rel="noopener">What is included at each tier</a></small></label>
+                  <select data-tier-for={f.slug} aria-label={`Tier for ${f.name}`}>
+                    {f.tiers.map((t, i) => <option value={i} selected={i === 1}>{t.name}: {t.hours[0]} to {t.hours[1]} h</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+          ) : null; })}
+        </div>
+        <aside class="calc-summary" aria-live="polite">
+          <h2 style="font-size:1.1rem">Your estimate</h2>
+          <div class="big" id="sumUsd">$0</div>
+          <div class="sub" id="sumInr">₹0 · 0 hours</div>
+          <div class="sub" id="sumWeeks"></div>
+          <label for="platform">Platform</label>
+          <select id="platform"><option value="web">Web application</option><option value="mobile">Mobile app (iOS and Android)</option><option value="both">Web and mobile</option></select>
+          <label for="rate">Hourly rate</label>
+          <select id="ratePreset">
+            <option value={String(rates.usdPerHour)} selected>Aresyn blended rate (${rates.usdPerHour}/h)</option>
+            <option value="60">Eastern Europe or LatAm agency (~$60/h)</option>
+            <option value="120">US or UK agency (~$120/h)</option>
+            <option value="custom">Custom</option>
+          </select>
+          <input type="number" id="rate" min="5" step="5" value={rates.usdPerHour} aria-label="Custom hourly rate in USD" style="margin-top:8px;display:none" />
+          <label><input type="checkbox" id="foundation" checked style="width:auto;margin-right:8px;vertical-align:middle" />Include project foundation ({rates.projectFoundationHours[0]} to {rates.projectFoundationHours[1]} h)</label>
+          <div id="rows" style="margin-top:12px"></div>
+          <a class="btn" id="quoteLink" href="/contact">Get a written quote with this estimate</a>
+          <p class="sub" style="margin-top:12px;font-size:0.8rem">Estimates for planning only. {rates.note}</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+  <Faq faqs={faqs} title="About the calculator" />
+  <Cta title="Prefer to talk it through?" body="A 30 minute scoping call usually narrows the range by half. No obligation." secondary={{ href: '/cost', label: 'Browse feature cost guides' }} />
+  <script define:vars={{ data, rates }}>
+    const $ = (id) => document.getElementById(id);
+    const bySlug = Object.fromEntries(data.map((f) => [f.slug, f]));
+    const fmtUsd = (n) => '$' + (n >= 1000 ? Math.round(n / 50) * 50 : Math.round(n / 10) * 10).toLocaleString('en-US');
+    const fmtInr = (n) => '₹' + (Math.round(n / 500) * 500).toLocaleString('en-IN');
+    const inrPerUsd = rates.inrPerHour / rates.usdPerHour;
+    const state = { selected: new Set(), tiers: {} };
+    const lines = () => Array.from(state.selected).map((slug) => { const f = bySlug[slug]; const t = f.tiers[state.tiers[slug] ?? 1]; return { name: f.name, tier: t.name, hours: t.hours }; });
+    const compute = () => {
+      const mult = rates.platformMultiplier[$('platform').value] || 1;
+      const rate = Number($('rate').value) || rates.usdPerHour;
+      let lo = 0, hi = 0;
+      const ls = lines();
+      ls.forEach((l) => { lo += l.hours[0]; hi += l.hours[1]; });
+      lo *= mult; hi *= mult;
+      if ($('foundation').checked && ls.length) { lo += rates.projectFoundationHours[0]; hi += rates.projectFoundationHours[1]; }
+      lo = Math.round(lo); hi = Math.round(hi);
+      const wk = (h) => Math.max(1, Math.round(h / (rates.hoursPerWeekOneDev * 1.5)));
+      $('sumUsd').textContent = ls.length ? `${fmtUsd(lo * rate)} to ${fmtUsd(hi * rate)}` : '$0';
+      $('sumInr').textContent = ls.length ? `${fmtInr(lo * rate * inrPerUsd)} to ${fmtInr(hi * rate * inrPerUsd)} · ${lo} to ${hi} hours` : 'Select features to begin';
+      $('sumWeeks').textContent = ls.length ? `Roughly ${wk(lo)} to ${wk(hi)} weeks with a small team` : '';
+      $('rows').innerHTML = ls.map((l) => `<div class="row"><span>${l.name} (${l.tier})</span><span>${l.hours[0]} to ${l.hours[1]} h</span></div>`).join('') + (ls.length && $('foundation').checked ? `<div class="row"><span>Project foundation</span><span>${rates.projectFoundationHours[0]} to ${rates.projectFoundationHours[1]} h</span></div>` : '') + (ls.length && mult !== 1 ? `<div class="row"><span>Platform multiplier</span><span>×${mult}</span></div>` : '');
+      const summary = ls.length ? `${$('platform').options[$('platform').selectedIndex].text}; ${ls.map((l) => `${l.name} (${l.tier})`).join(', ')}; ${lo} to ${hi} hours; ${fmtUsd(lo * rate)} to ${fmtUsd(hi * rate)} at $${rate}/h` : '';
+      $('quoteLink').href = '/contact' + (summary ? `?estimate=${encodeURIComponent(summary)}` : '');
+      try { localStorage.setItem('aresyn-calc', JSON.stringify({ selected: Array.from(state.selected), tiers: state.tiers, platform: $('platform').value })); } catch {}
+    };
+    document.querySelectorAll('#calcFeatures input[type="checkbox"]').forEach((cb) => cb.addEventListener('change', () => { cb.checked ? state.selected.add(cb.dataset.slug) : state.selected.delete(cb.dataset.slug); compute(); }));
+    document.querySelectorAll('#calcFeatures select').forEach((sel) => sel.addEventListener('change', () => { state.tiers[sel.dataset.tierFor] = Number(sel.value); compute(); }));
+    $('platform').addEventListener('change', compute);
+    $('foundation').addEventListener('change', compute);
+    $('ratePreset').addEventListener('change', () => { const v = $('ratePreset').value; if (v === 'custom') { $('rate').style.display = 'block'; } else { $('rate').style.display = 'none'; $('rate').value = v; } compute(); });
+    $('rate').addEventListener('input', compute);
+    try {
+      const saved = JSON.parse(localStorage.getItem('aresyn-calc') || 'null');
+      if (saved) {
+        saved.selected.forEach((s) => { const cb = document.getElementById('f-' + s); if (cb) { cb.checked = true; state.selected.add(s); } });
+        Object.entries(saved.tiers || {}).forEach(([s, t]) => { const sel = document.querySelector(`select[data-tier-for="${s}"]`); if (sel) { sel.value = String(t); state.tiers[s] = Number(t); } });
+        if (saved.platform) $('platform').value = saved.platform;
+      }
+    } catch {}
+    compute();
+  </script>
+</Base>

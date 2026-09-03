@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+import Marquee from '../components/Marquee.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Faq from '../components/Faq.astro';
+import Cta from '../components/Cta.astro';
+import { site } from '../data/site';
+import { services } from '../data/services';
+import { industries } from '../data/industries';
+import { faqPage } from '../lib/seo';
+import { getCollection } from 'astro:content';
+
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const guides = (await getCollection('guides')).filter((g) => g.id !== 'custom-web-app-development-cost').sort((a, b) => a.data.order - b.data.order).slice(0, 3);
+
+const faqs = [
+  { q: 'Where is Aresyn based and who do you work with?', a: `We are based in ${[site.location.city, site.location.region, site.location.country].filter(Boolean).join(', ')} and work remotely with founders, operations leaders and marketing teams in India, the US, the UK, the Middle East and Australia. Our hours overlap with US and European mornings, and every project has a single point of contact who is also an engineer on the work.` },
+  { q: 'Do you take part-time engagements?', a: 'Yes. Alongside fixed-scope projects we work as a part-time engineering team, which suits companies that need senior developers for a few days a week rather than a full hire. The engagement covers an agreed amount of time each month, a shared task board and weekly check-ins, and it can be paused or scaled with a month of notice.' },
+  { q: 'How do we get started?', a: 'Send a short message describing what you need, who will use it and any deadline. We reply within one business day with questions, then book a 30 to 45 minute scoping call. A written proposal with the scope, the timeline and what is not included follows within a few days of that call, and work usually starts within two weeks of you approving it.' },
+  { q: 'What technologies do you work with?', a: 'TypeScript, React and Next.js for web, Flutter and React Native for mobile, Node.js and Python for backends, PostgreSQL for data, and Cloudflare, AWS or Vercel for hosting. For AI we use OpenAI, Anthropic and Google models or open-weight models on your own infrastructure. We choose the stack for the problem, and we do not rewrite working systems for the sake of it.' },
+  { q: 'Who owns the code, accounts and data?', a: 'You do, from the first day. Repositories, cloud accounts, domains and third-party services are created in your name and we work inside them. When a project ends you keep everything with documentation, and you are free to continue with your own team or another vendor.' },
+  { q: 'Will you sign an NDA and can you start quickly?', a: 'Yes on both. We sign a mutual NDA before any detailed discussion if you prefer. A scoping call can usually happen within a few days of your first message, and small projects or part-time engagements typically start within two weeks of an agreed proposal.' },
+];
+const schema = [faqPage(faqs)];
+const title = 'Aresyn Technologies | Custom Software, Apps & AI Automation';
+const description = 'Senior India-based team building custom web applications, mobile apps and AI automation for growing businesses worldwide. Fixed-scope or part-time engineering.';
+---
+<Base title={title} description={description} path="/" schema={schema}>
+  <section class="hero">
+    <div class="hero-orbit" aria-hidden="true"></div>
+    <div class="hero-watermark" aria-hidden="true">ARESYN</div>
+    <div class="container">
+      <div class="hero-content fade-up visible">
+        <span class="eyebrow">Custom software · Mobile apps · AI automation</span>
+        <h1>Custom software and AI, built by a senior team you can actually talk to.</h1>
+        <p class="lead">Aresyn is a small engineering studio based in India. We build web applications, mobile apps and AI-powered automation for founders and operations leaders worldwide, on fixed-scope projects or as a part-time extension of your team.</p>
+        <div class="btn-group">
+          <a href="/contact" class="btn">Start a project</a>
+          <a href="/work" class="btn btn-outline">See our work</a>
+        </div>
+        <div class="hero-meta">
+          <span>Written proposal before you commit</span>
+          <span>Weekly demos</span>
+          <span>You own the code and accounts</span>
+          <span>Part-time and fixed-scope options</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="logo-strip fade-up">
+        <span class="eyebrow" style="margin:0">Worked with</span>
+        {site.clients.map((c) => <span>{c}</span>)}
+        <span>Independent practitioners in health and wellness</span>
+      </div>
+    </div>
+  </section>
+
+  <Marquee />
+
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">What we build</span>
+        <h2>Four things we do well, and nothing we do badly</h2>
+        <p>Every engagement is led by an engineer who has shipped the type of system you need. No account managers, no handoffs to a junior team after the sale.</p>
+      </div>
+      <div class="grid grid-2">
+        {services.map((s, i) => (
+          <a href={`/services/${s.slug}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <span class="card-num">0{i + 1}</span>
+            <h3>{s.name}</h3>
+            <p>{s.intro[0].split('. ').slice(0, 2).join('. ')}.</p>
+            <span class="card-link">See what we build</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted" id="industries">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">Industries</span>
+        <h2>Built around how your industry actually works</h2>
+        <p>Each page below describes the specific systems, integrations and AI use cases we build for that industry. Pick yours.</p>
+      </div>
+      <div class="grid grid-4">
+        {industries.map((ind, i) => (
+          <a href={`/industries/${ind.slug}`} class={`card card-flat fade-up stagger-${(i % 3) + 1}`}>
+            <h3 style="font-size:1.1rem">{ind.name}</h3>
+            <p class="small">For {ind.audience.split(',').slice(0, 2).join(',')}.</p>
+            <span class="card-link">What we build</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">How we work</span>
+        <h2>From first message to launch</h2>
+      </div>
+      <div class="steps">
+        <div class="step fade-up stagger-1"><h3>Scoping call</h3><p>A 30 to 45 minute call about the problem, the users and the deadline. You get honest feedback on what is worth building first.</p></div>
+        <div class="step fade-up stagger-2"><h3>Written proposal</h3><p>Scope, timeline and what is not included, in writing. For larger projects we propose a short discovery phase before committing to the whole build.</p></div>
+        <div class="step fade-up stagger-3"><h3>Build in the open</h3><p>Weekly demos, a shared task board, staging environments you can use, and code in your own repository from day one.</p></div>
+        <div class="step fade-up stagger-3"><h3>Launch and support</h3><p>Deployment, documentation and handover, then an agreed support window or a part-time retainer if you want us to keep shipping.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">Engagement models</span>
+        <h2>Three ways to work with us</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card fade-up stagger-1">
+          <span class="tag">Most common</span>
+          <h3>Fixed-scope project</h3>
+          <p>A defined deliverable with a fixed timeline. Best for a new product, portal, app or website where the scope can be written down before starting.</p>
+          <ul class="list-check small"><li>Written scope and acceptance criteria</li><li>Milestone-based delivery</li><li>Typical size: 6 to 16 weeks</li></ul>
+        </div>
+        <div class="card fade-up stagger-2">
+          <span class="tag">Flexible</span>
+          <h3>Part-time engineering team</h3>
+          <p>Senior engineers for an agreed amount of time each month, working from your backlog. Best for ongoing product work, integrations and AI features without a full-time hire.</p>
+          <ul class="list-check small"><li>Month to month, pause with notice</li><li>Weekly planning and demos</li><li>Scales up or down as you need</li></ul>
+        </div>
+        <div class="card fade-up stagger-3">
+          <span class="tag">Focused</span>
+          <h3>Discovery and prototype</h3>
+          <p>One to two weeks to test an idea on your real data, produce a clickable prototype and a written plan. Best before committing to a large build or an AI initiative.</p>
+          <ul class="list-check small"><li>Fixed duration</li><li>Prototype and written plan</li><li>Leads straight into the build if we continue</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="work">
+    <div class="container">
+      <div class="section-header fade-up">
+        <span class="eyebrow">Selected work</span>
+        <h2>Recent projects</h2>
+      </div>
+      <div class="grid grid-2">
+        {work.map((w, i) => (
+          <a href={`/work/${w.id}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <span class="chip chip-strong">{w.data.client}</span>
+            <h3>{w.data.title}</h3>
+            <p>{w.data.summary}</p>
+            <span class="card-link">Read the case study</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Testimonials />
+
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up">
+          <span class="eyebrow">Guides</span>
+          <h2>Before you hire anyone, read these</h2>
+          <p class="mt-2">Plain-language guides on hiring models, build-versus-buy and briefing a project, written from our side of the table.</p>
+          <ul class="list-plain mt-3">
+            {guides.map((g) => <li><a href={`/guides/${g.id}`}>{g.data.title}</a></li>)}
+          </ul>
+          <a href="/guides" class="btn btn-outline btn-sm mt-3">All guides</a>
+        </div>
+        <div class="card fade-up stagger-2">
+          <span class="eyebrow">Talk to us</span>
+          <h3>Have something in mind already?</h3>
+          <p>Send two paragraphs about the problem, who will use the software and any deadline. An engineer reads every message and replies within one business day.</p>
+          <a href="/contact" class="btn">Send a message</a>
+          <a href={`mailto:${site.email}`} class="small">Or email {site.email}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq faqs={faqs} title="Questions people ask before working with us" />
+  <Cta />
+</Base>

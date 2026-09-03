@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Cta from '../../components/Cta.astro';
+import { breadcrumb } from '../../lib/seo';
+import { getCollection } from 'astro:content';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Guides', href: '/guides' }];
+const guides = (await getCollection('guides')).filter((g) => g.id !== 'custom-web-app-development-cost').sort((a, b) => a.data.order - b.data.order);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base title="Guides on Hiring Developers and Build vs Buy | Aresyn" description="Plain-language guides for founders and managers: freelancer vs part-time developer vs agency, when to build instead of buying SaaS, and how to brief a project." path="/guides" pageType="CollectionPage" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Guides" title="Read this before you hire anyone." lead="Written from the vendor's side of the table. No newsletter, no gate." />
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2">
+        {guides.map((g, i) => (
+          <a href={`/guides/${g.id}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <span class="small muted">{fmt(g.data.dateModified ?? g.data.datePublished)}{g.data.readingMinutes ? ` · ${g.data.readingMinutes} min read` : ''}</span>
+            <h2 style="font-size:1.3rem">{g.data.title}</h2>
+            <p>{g.data.description}</p>
+            <span class="card-link">Read the guide</span>
+          </a>
+        ))}
+        <a href="/contact" class="card card-flat fade-up"><span class="tag">Ask us</span><h2 style="font-size:1.3rem">A question these guides do not answer?</h2><p>Send it over. Short questions get short answers, usually the same day.</p><span class="card-link">Send a message</span></a>
+      </div>
+    </div>
+  </section>
+  <Cta />
+</Base>

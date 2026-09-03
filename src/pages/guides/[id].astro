@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Faq from '../../components/Faq.astro';
+import Cta from '../../components/Cta.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { getCollection, render } from 'astro:content';
+import { site } from '../../data/site';
+import { article, breadcrumb, faqPage } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides');
+  return guides.map((g) => ({ params: { id: g.id }, props: { g } }));
+}
+const { g } = Astro.props;
+const { Content } = await render(g);
+const path = `/guides/${g.id}`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Guides', href: '/guides' }, { name: g.data.title, href: path }];
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const labelFor = (p: string) => p.replace(/^\//, '').split('/').map((s) => s.replace(/-/g, ' ')).join(' · ').replace(/\b\w/g, (c) => c.toUpperCase());
+const schema = [article({ title: g.data.title, description: g.data.description, path, datePublished: g.data.datePublished, dateModified: g.data.dateModified }), breadcrumb(crumbs), ...(g.data.faqs.length ? [faqPage(g.data.faqs)] : [])];
+---
+<Base title={g.data.title} description={g.data.description} path={path} ogType="article" schema={schema} ogImage={`/og/guides-${g.id}.png`} publishedTime={g.data.datePublished} modifiedTime={g.data.dateModified}>
+  <section class="page-header">
+    <div class="container">
+      <Breadcrumbs items={[crumbs[0], crumbs[1], { name: 'Guide', href: path }]} />
+      <span class="eyebrow">Guide</span>
+      <h1>{g.data.title}</h1>
+      <p class="lead">{g.data.description}</p>
+      <div class="article-meta">
+        <span>By the <a href="/about">{site.name} team</a></span>
+        <span>Published {fmt(g.data.datePublished)}</span>
+        {g.data.dateModified && <span>Updated {fmt(g.data.dateModified)}</span>}
+        {g.data.readingMinutes && <span>{g.data.readingMinutes} min read</span>}
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container-narrow">
+      <div class="takeaways fade-up visible">
+        <h2>Key takeaways</h2>
+        <ul class="list-check">{g.data.keyTakeaways.map((k) => <li>{k}</li>)}</ul>
+      </div>
+      <article class="prose"><Content /></article>
+      <div class="author-box">
+        <div class="author-avatar" aria-hidden="true">A</div>
+        <div><strong>Written by the {site.name} team</strong><p>{site.description}</p></div>
+      </div>
+    </div>
+  </section>
+  {g.data.faqs.length > 0 && <Faq faqs={g.data.faqs} />}
+  <RelatedLinks title="Related" items={g.data.related.filter((p) => !p.startsWith('/cost') && !p.startsWith('/tools')).map((p) => ({ href: p, label: labelFor(p) }))} cols={4} />
+  <Cta />
+</Base>

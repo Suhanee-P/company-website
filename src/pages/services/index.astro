@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Cta from '../../components/Cta.astro';
+import { services } from '../../data/services';
+import { breadcrumb } from '../../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Services', href: '/services' }];
+---
+<Base title="Services | Web Apps, Mobile Apps, AI & Design | Aresyn" description="Custom web application development, iOS and Android apps, AI solutions and automation, and product design and branding. Fixed-scope or part-time engineering." path="/services" pageType="CollectionPage" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Services" title="What we build, and how." lead="Four services, delivered by the same small senior team. Every one starts with a written scope and ends with code, accounts and documentation you own." />
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2">
+        {services.map((s, i) => (
+          <a href={`/services/${s.slug}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <span class="card-num">0{i + 1}</span>
+            <h2 style="font-size:1.4rem">{s.name}</h2>
+            <p>{s.metaDescription}</p>
+            <ul class="list-plain small">{s.whatWeBuild.slice(0, 4).map((w) => <li>{w.name}</li>)}</ul>
+            <span class="card-link">Details, stack and FAQ</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="section section-lifted">
+    <div class="container">
+      <div class="two-col">
+        <div class="fade-up">
+          <span class="eyebrow">Engagement</span>
+          <h2>Fixed-scope, part-time or discovery</h2>
+          <p class="mt-2">A defined build with a fixed timeline, a part-time senior engineering team for ongoing work, or a one to two week discovery to test an idea before committing. Details on the <a href="/about">about page</a>.</p>
+        </div>
+        <div class="fade-up stagger-1">
+          <span class="eyebrow">Start</span>
+          <h2>Tell us what you need</h2>
+          <p class="mt-2">Two paragraphs about the problem, the users and any deadline is enough. We reply within one business day and a written proposal follows a short call.</p>
+          <div class="btn-group mt-3"><a href="/contact" class="btn">Send a message</a><a href="/work" class="btn btn-outline">See our work</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <Cta />
+</Base>

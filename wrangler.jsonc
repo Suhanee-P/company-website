@@ -1,14 +1,18 @@
 {
+  // Cloudflare Worker with static assets. The Git build runs `npm run build` then `npx wrangler deploy`.
+  // "name" must stay the name of the Worker that owns aresyntechnologies.com.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "company-website",
-  "compatibility_date": "2026-04-19",
-  "observability": {
-    "enabled": true
-  },
+  "account_id": "5cc3defdf22c701e4b8d1c9570d5dd59",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "."
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
   },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  // Keep variables set in the dashboard (CONTACT_TO, CONTACT_FROM) across deploys.
+  "keep_vars": true,
+  "observability": { "enabled": true }
 }

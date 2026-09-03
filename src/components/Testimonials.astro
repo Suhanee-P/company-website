@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const initials = (name: string) => name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+---
+<section class="section section-lifted" aria-labelledby="testimonials-heading">
+  <div class="container">
+    <div class="section-header center fade-up" style="margin-left:auto;margin-right:auto;text-align:center">
+      <span class="eyebrow">What clients say</span>
+      <h2 id="testimonials-heading">In their words</h2>
+    </div>
+    <div class="testimonial-carousel fade-up stagger-1">
+      <div class="testimonial-track-wrapper">
+        <div class="testimonial-track" id="testimonialTrack">
+          {work.map((w) => (
+            <figure class="testimonial-slide">
+              <div class="testimonial-stars" aria-hidden="true">★★★★★</div>
+              <blockquote class="testimonial-text">“{w.data.testimonial.quote}”</blockquote>
+              <figcaption class="testimonial-author">
+                <div class="author-avatar" aria-hidden="true">{initials(w.data.testimonial.author)}</div>
+                <div class="author-info">
+                  <strong>{w.data.testimonial.author}</strong>
+                  <span>{w.data.testimonial.role}</span>
+                  <a href={`/work/${w.id}`} class="small">Read the case study</a>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+      <div class="testimonial-controls">
+        <button class="carousel-btn" id="carouselPrev" aria-label="Previous testimonial">←</button>
+        <div class="carousel-dots" id="carouselDots" role="tablist">
+          {work.map((_, i) => <button class={`carousel-dot${i === 0 ? ' active' : ''}`} data-index={i} aria-label={`Show testimonial ${i + 1}`}></button>)}
+        </div>
+        <button class="carousel-btn" id="carouselNext" aria-label="Next testimonial">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  const track = document.getElementById('testimonialTrack');
+  const prev = document.getElementById('carouselPrev');
+  const next = document.getElementById('carouselNext');
+  const dots = Array.from(document.querySelectorAll<HTMLButtonElement>('.carousel-dot'));
+  if (track && prev && next && dots.length) {
+    let current = 0; let timer: number | undefined;
+    const total = dots.length;
+    const goTo = (i: number) => {
+      current = (i + total) % total;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, j) => d.classList.toggle('active', j === current));
+    };
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start = () => { if (!reduce) timer = window.setInterval(() => goTo(current + 1), 6000); };
+    const reset = () => { if (timer) clearInterval(timer); start(); };
+    prev.addEventListener('click', () => { goTo(current - 1); reset(); });
+    next.addEventListener('click', () => { goTo(current + 1); reset(); });
+    dots.forEach((d) => d.addEventListener('click', () => { goTo(Number(d.dataset.index)); reset(); }));
+    track.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
+    track.addEventListener('mouseleave', reset);
+    start();
+  }
+</script>

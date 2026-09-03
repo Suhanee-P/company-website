@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Cta from '../../components/Cta.astro';
+import { industries } from '../../data/industries';
+import { breadcrumb } from '../../lib/seo';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Industries', href: '/industries' }];
+---
+<Base title="Industries We Build Software For | Aresyn" description="Custom software, mobile apps and AI for logistics, real estate, healthcare, pharma, retail, education, fintech, manufacturing, hospitality and professional services." path="/industries" pageType="CollectionPage" schema={[breadcrumb(crumbs)]}>
+  <PageHeader crumbs={crumbs} eyebrow="Industries" title="Software built around how your industry works." lead="Each page below lists the specific systems we build for that industry, the tools we integrate with, and where AI genuinely helps. If your industry is not here, the closest one will still tell you how we think." />
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-3">
+        {industries.map((ind, i) => (
+          <a href={`/industries/${ind.slug}`} class={`card fade-up stagger-${(i % 3) + 1}`}>
+            <h2 style="font-size:1.25rem">{ind.name}</h2>
+            <p class="small">For {ind.audience}.</p>
+            <ul class="list-plain small">{ind.solutions.slice(0, 3).map((s) => <li>{s.name}</li>)}</ul>
+            <span class="card-link">What we build</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+  <Cta title="Industry not listed?" body="We work across sectors; the industry pages just show the patterns we see most. Describe your business and we will tell you honestly whether it is a fit." />
+</Base>
