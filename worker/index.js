@@ -1,12 +1,17 @@
-// Cloudflare Pages Function: POST /api/contact
-// Sends the enquiry by email through Resend when RESEND_API_KEY is configured.
-// Env (Pages -> Settings -> Variables): RESEND_API_KEY (secret), CONTACT_TO, CONTACT_FROM.
+// Cloudflare Worker for aresyntechnologies.com.
+// Static files come from ./dist (built by Astro) through the ASSETS binding.
+// Anything that is not a static file reaches this script; today that is only POST /api/contact,
+// which emails the enquiry through Resend when RESEND_API_KEY is configured.
+// Runtime variables (Settings > Variables & Secrets): RESEND_API_KEY (secret), CONTACT_TO, CONTACT_FROM.
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
 const clean = (v, max) => String(v ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, max);
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function onRequestPost({ request, env }) {
+async function contact(request, env) {
+  if (request.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
   let data;
   try {
     const ct = request.headers.get('content-type') || '';
@@ -20,20 +25,17 @@ export async function onRequestPost({ request, env }) {
   const email = clean(data.email, 200);
   const company = clean(data.company, 160);
   const topic = clean(data.topic, 120);
-  const budget = clean(data.budget, 60);
   const message = String(data.message ?? '').trim().slice(0, 5000);
-
-  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10) {
-    return json({ ok: false, error: 'validation', fields: { name: !name, email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), message: message.length < 10 } }, 422);
+  if (!name || !EMAIL.test(email) || message.length < 10) {
+    return json({ ok: false, error: 'validation', fields: { name: !name, email: !EMAIL.test(email), message: message.length < 10 } }, 422);
   }
-
   if (!env.RESEND_API_KEY) return json({ ok: false, error: 'not_configured' }, 503);
 
   const to = env.CONTACT_TO || 'contact@aresyntechnologies.com';
   const from = env.CONTACT_FROM || 'Aresyn Website <onboarding@resend.dev>';
   const text = [
-    `Name: ${name}`, `Email: ${email}`, company && `Company: ${company}`, topic && `Topic: ${topic}`, budget && `Budget: ${budget}`,
-    '', message, '', `Page: ${request.headers.get('referer') || 'unknown'}`, `IP country: ${request.headers.get('cf-ipcountry') || 'unknown'}`,
+    `Name: ${name}`, `Email: ${email}`, company && `Company: ${company}`, topic && `Topic: ${topic}`, '', message, '',
+    `Page: ${request.headers.get('referer') || 'unknown'}`, `Country: ${request.headers.get('cf-ipcountry') || 'unknown'}`,
   ].filter((l) => l !== undefined && l !== false).join('\n');
 
   const res = await fetch('https://api.resend.com/emails', {
@@ -45,5 +47,12 @@ export async function onRequestPost({ request, env }) {
   return json({ ok: true });
 }
 
-export const onRequest = ({ request }) =>
-  request.method === 'POST' ? undefined : json({ ok: false, error: 'method_not_allowed' }, 405);
+export default {
+  async fetch(request, env) {
+    const { pathname } = new URL(request.url);
+    if (pathname === '/api/contact') return contact(request, env);
+    if (pathname.startsWith('/api/')) return json({ ok: false, error: 'not_found' }, 404);
+    // Any other non-asset request: let the assets binding apply 404.html handling.
+    return env.ASSETS.fetch(request);
+  },
+};
