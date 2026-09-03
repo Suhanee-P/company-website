@@ -1,12 +1,12 @@
 {
-  // Cloudflare Worker with static assets. The dashboard's Git build runs `npm run build` then `npx wrangler deploy`.
-  // IMPORTANT: "name" must be the name of the existing Worker that owns aresyntechnologies.com,
-  // otherwise `wrangler deploy` creates a second Worker and the live domain does not update.
+  // Cloudflare Worker with static assets. The Git build runs `npm run build` then `npx wrangler deploy`.
+  // "name" must stay the name of the Worker that owns aresyntechnologies.com.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "company-website",
   "account_id": "5cc3defdf22c701e4b8d1c9570d5dd59",
   "main": "worker/index.js",
   "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
